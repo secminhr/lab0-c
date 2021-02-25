@@ -38,6 +38,29 @@ void q_free(queue_t *q)
 }
 
 /*
+ * Attemp to allocate an element.
+ * Return NULL if q is NULL or allocation failed,
+ * Return newly allocated element otherwise.
+ */
+static list_ele_t *alloc_ele(queue_t *q, size_t value_size)
+{
+    if (q == NULL) {
+        return NULL;
+    }
+    list_ele_t *new = malloc(sizeof(list_ele_t));
+    if (new == NULL) {
+        return NULL;
+    }
+    char *value = malloc(value_size);
+    if (value == NULL) {
+        free(new);
+        return NULL;
+    }
+    new->value = value;
+    return new;
+}
+
+/*
  * Attempt to insert element at head of queue.
  * Return true if successful.
  * Return false if q is NULL or could not allocate space.
@@ -46,21 +69,12 @@ void q_free(queue_t *q)
  */
 bool q_insert_head(queue_t *q, char *s)
 {
-    if (q == NULL) {
-        return false;
-    }
-    list_ele_t *newh = malloc(sizeof(list_ele_t));
+    list_ele_t *newh = alloc_ele(q, strlen(s) + 1);
     if (newh == NULL) {
         return false;
     }
-    char *str = malloc(strlen(s) + 1);
-    if (str == NULL) {
-        free(newh);
-        return false;
-    }
-    strncpy(str, s, strlen(s) + 1);
+    strncpy(newh->value, s, strlen(s) + 1);
     newh->next = q->head;
-    newh->value = str;
     q->head = newh;
     if (q->size == 0) {
         q->tail = newh;
@@ -78,21 +92,12 @@ bool q_insert_head(queue_t *q, char *s)
  */
 bool q_insert_tail(queue_t *q, char *s)
 {
-    if (q == NULL) {
-        return false;
-    }
-    list_ele_t *newt = malloc(sizeof(list_ele_t));
+    list_ele_t *newt = alloc_ele(q, strlen(s) + 1);
     if (newt == NULL) {
         return false;
     }
-    char *str = malloc(strlen(s) + 1);
-    if (str == NULL) {
-        free(newt);
-        return false;
-    }
-    strncpy(str, s, strlen(s) + 1);
+    strncpy(newt->value, s, strlen(s) + 1);
     newt->next = NULL;
-    newt->value = str;
     if (q->size) {
         q->tail->next = newt;
     } else {
