@@ -170,6 +170,40 @@ void q_reverse(queue_t *q)
     q->head = prev;
 }
 
+static void split(queue_t *q, queue_t *q1, queue_t *q2)
+{
+    int split_pos = q->size / 2 - 1;
+    q1->size = split_pos + 1;
+    q1->head = q->head;
+    q2->size = q->size - q1->size;
+    q2->tail = q->tail;
+    list_ele_t *split_ele = q->head;
+    for (int i = 0; i < split_pos; i++) {
+        split_ele = split_ele->next;
+    }
+    q1->tail = split_ele;
+    q2->head = split_ele->next;
+    q1->tail->next = NULL;
+}
+
+static void merge(queue_t q1, queue_t q2, queue_t *dest)
+{
+    list_ele_t **merge_cur = &(dest->head);
+    while (q1.head && q2.head) {
+        if (strcmp(q1.head->value, q2.head->value) < 0) {
+            *merge_cur = q1.head;
+            q1.head = q1.head->next;
+        } else {
+            *merge_cur = q2.head;
+            q2.head = q2.head->next;
+        }
+        merge_cur = &((*merge_cur)->next);
+    }
+    queue_t last = q1.head ? q1 : q2;
+    *merge_cur = last.head;
+    dest->tail = last.tail;
+}
+
 /*
  * Sort elements of queue in ascending order
  * No effect if q is NULL or empty. In addition, if q has only one
@@ -177,6 +211,12 @@ void q_reverse(queue_t *q)
  */
 void q_sort(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
+    if (q == NULL || q->size == 0 || q->size == 1) {
+        return;
+    }
+    queue_t q1, q2;
+    split(q, &q1, &q2);
+    q_sort(&q1);
+    q_sort(&q2);
+    merge(q1, q2, q);
 }
